@@ -21,7 +21,6 @@
             padding: 20px;
         }
 
-        /* Контейнер-монитор */
         .terminal {
             background-color: #000000;
             width: 100%;
@@ -36,7 +35,6 @@
             position: relative;
         }
 
-        /* "Стекло" терминала — эффект сканирования */
         .terminal::before {
             content: "";
             position: absolute;
@@ -50,7 +48,6 @@
             z-index: 2;
         }
 
-        /* Верхняя панель */
         .terminal-header {
             padding: 8px 15px;
             background: #0a1a1f;
@@ -71,7 +68,6 @@
             font-size: 11px;
         }
 
-        /* Область вывода — скроллится */
         .output-area {
             flex: 1;
             overflow-y: auto;
@@ -86,7 +82,6 @@
             gap: 6px;
         }
 
-        /* Кастомный скролл */
         .output-area::-webkit-scrollbar {
             width: 6px;
         }
@@ -98,7 +93,6 @@
             border-radius: 3px;
         }
 
-        /* Строка ввода */
         .input-line {
             display: flex;
             align-items: center;
@@ -126,7 +120,6 @@
             caret-color: #6fdfef;
         }
 
-        /* Стиль для ссылок-подсказок (можно убрать, но для ARG полезно) */
         .hint {
             color: #2a8a9a;
             font-size: 11px;
@@ -135,7 +128,6 @@
             padding-top: 8px;
         }
 
-        /* Некоторые спец-сообщения */
         .secret {
             color: #ffdd77;
             text-shadow: 0 0 1px #ffaa33;
@@ -173,28 +165,22 @@
 </div>
 
 <script>
-    // Данные, которые компьютер хранит в себе (скрытые послания, дневник, секретные файлы)
-    // Игрок может листать их командами CAT, LIST или с помощью скрытых команд.
-
-    // База данных "файлов" терминала
     const filesystem = {
         "readme.txt": "Этот терминал содержит архивы пользователя. Попробуй: LIST, CAT <file>, кроме того, есть секретные методы.",
         "diary_01.txt": "[ЗАПИСЬ #1] 20 декабря. Странно. В это месте время идёт иначе. Пространство также искажено. Возможно, этого места не существует. Код доступа? Может быть, 's3cr3t'?",
         "diary_02.txt": "[ЗАПИСЬ #2] Слишком холодно. Глубокое хроническое одиночество. Это серьёзнее чем может показаться. Представь что находишься в бесконечном космическом пространстве. Ты можешь слышать других людей по рации, их голоса и образы. Но ты не можешь присоединиться.",
         "diary_03.txt": "[ЗАПИСЬ #3] Мои идеи никому не нужны. Я пытаюсь создать изобретение что могло бы поменять жизнь людей к лучшему, но в одиночку на это у меня уйдёт вся жизнь. Здесь никого нет. Я один. Никто не хочет слушать меня... Нет, тут кто-то есть, просто я ещё не нашёл. Если кто-то читает это, введите 'SHADOW' - возможно, вы найдёте что-то важное. Надеюсь это вам поможет, путник. Будьте осторожны. Берегите себя.",
-        "diary_04.txt": "[ЗАПИСЬ #4] Из тысячи отправленных сообщений, только на одно пришёл ответ. Я думал что не существую, до этого момента."
+        "diary_04.txt": "[ЗАПИСЬ #4] Из тысячи отправленных сообщений, только на одно пришёл ответ. Я думал что не существую, до этого момента.",
         "log_system.log": "[СИСТЕМА] 2024-04-21 : Обнаружены аномальные запросы / ВНИМАНИЕ! / Ищешь правду? (введи 'ROOT_ACCESS')",
         "note_private.txt": "==== ЛИЧНОЕ ==== \nЯ чувствую вину. Я прячу 'ключ' в простой фразе: \"LS -LA\" покажет скрытую директорию, а команда 'RECOVER' восстановит последний фрагмент дневника.",
     };
 
-    // Скрытая директория (то, что не отображается в LIST, но доступно по спецкомандам)
     const hiddenEntries = {
         ".secret_angel": "[ЗАШИФРОВАННОЕ ПОСЛАНИЕ] ",
         ".final_confession": "====== ПОСЛЕДНЯЯ ЗАПИСЬ ======\nДневник обрывается. Я спрятал правду в изображении, но компьютер помнит пароль: WHL0137-LS",
         "hidden_cmd_list": "Секретные команды, которые работают в этом терминале:\n- SHADOW\n- UNLOCK MEMORY\n- ROOT_ACCESS\n- RECOVER\n- LS -LA (псевдоним)\n- HELP (обычная помощь)"
     };
 
-    // Вспомогательная функция для вывода на экран
     const outputArea = document.getElementById('outputArea');
     const commandInput = document.getElementById('commandInput');
 
@@ -205,7 +191,6 @@
         }
         line.innerText = text;
         outputArea.appendChild(line);
-        // Автоскролл вниз
         outputArea.scrollTop = outputArea.scrollHeight;
     }
 
@@ -215,18 +200,15 @@
         addToOutput("> Терминал готов.", "hint");
     }
 
-    // Обработка команд
     function processCommand(cmd) {
         const trimmed = cmd.trim().toLowerCase();
         const original = cmd.trim();
         
-        // Пустая команда
         if (trimmed === "") {
             addToOutput("");
             return;
         }
 
-        // Команда HELP
         if (trimmed === "help") {
             addToOutput("Доступные команды:", "entry-title");
             addToOutput("  LIST          - показать все доступные файлы (дневник, логи)", "hint");
@@ -239,7 +221,6 @@
             return;
         }
 
-        // LIST : показать имена обычных файлов
         if (trimmed === "list") {
             addToOutput("=== Доступные файлы в текущей директории ===", "entry-title");
             for (let file in filesystem) {
@@ -250,11 +231,9 @@
             return;
         }
 
-        // CAT file
         if (trimmed.startsWith("cat ")) {
             const fileName = original.substring(4).trim();
             if (filesystem[fileName]) {
-                // Проверяем на наличие прямых подсказок внутри контента (ARS)
                 let content = filesystem[fileName];
                 addToOutput(`=== Содержимое ${fileName} ===`, "entry-title");
                 const lines = content.split('\n');
@@ -276,7 +255,6 @@
             return;
         }
 
-        // TIME - немного с игровой атмосферой
         if (trimmed === "time") {
             const now = new Date();
             addToOutput(`Системное время ARG: ${now.toLocaleString()}`, "hint");
@@ -284,22 +262,17 @@
             return;
         }
 
-        // WHOAMI
         if (trimmed === "whoami") {
             addToOutput("guest_user (уровень доступа: ограниченный)");
             addToOutput("Но сессия имеет следы предыдущего хозяина: 'North.'", "secret");
             return;
         }
 
-        // CLEAR
         if (trimmed === "clear") {
             clearOutput();
             return;
         }
-
-        // ============ СЕКРЕТНЫЕ КОМАНДЫ (основная механика ARG) ============
         
-        // SHADOW - секретная команда из дневника (координаты убежища)
         if (trimmed === "shadow") {
             addToOutput(">>> [СИСТЕМА РАСШИФРОВКИ] <<<", "secret");
             addToOutput("Координаты убежища: 47.3769° N, 8.5417° E", "secret");
@@ -308,7 +281,6 @@
             return;
         }
 
-        // UNLOCK MEMORY - пробуждает секретный фрагмент
         if (trimmed === "unlock memory") {
             addToOutput("ВВЕДЕН КОД РАЗБЛОКИРОВКИ ПАМЯТИ", "secret");
             addToOutput("Извлечение скрытой записи #X:", "entry-title");
@@ -317,7 +289,6 @@
             return;
         }
 
-        // ROOT_ACCESS - показать системные логи
         if (trimmed === "root_access") {
             addToOutput("РЕЖИМ ROOT АКТИВИРОВАН (ЭМУЛЯЦИЯ)", "warning");
             addToOutput("Секретный дамп конфигурации:", "entry-title");
@@ -326,7 +297,6 @@
             return;
         }
 
-        // RECOVER - последнее зашифрованное сообщение
         if (trimmed === "recover") {
             addToOutput("ЗАПУСК ПРОЦЕДУРЫ ВОССТАНОВЛЕНИЯ...", "warning");
             addToOutput(hiddenEntries[".final_confession"], "secret");
@@ -335,7 +305,6 @@
             return;
         }
 
-        // Скрытая команда "ls -la" (имитация юникса)
         if (trimmed === "ls -la") {
             addToOutput("Показываю все объекты (включая скрытые):", "entry-title");
             for (let f in filesystem) {
@@ -349,40 +318,33 @@
             return;
         }
 
-        // Дополнительный пасхалка-команда, которая вызывает больше дневниковой атмосферы
         if (trimmed === "diary") {
             addToOutput("=== Полный список дневников ===");
-            addToOutput("diary_01.txt, diary_02.txt, diary_03.txt", "hint");
+            addToOutput("diary_01.txt, diary_02.txt, diary_03.txt, diary_04.txt", "hint");
             addToOutput("Также есть скрытая команда 'SHADOW' и 'UNLOCK MEMORY'", "secret");
             return;
         }
 
-        // Если команда не распознана
         addToOutput(`Неизвестная команда: "${original}". Введите HELP.`, "warning");
     }
 
-    // Отслеживаем ввод
     commandInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
             const command = commandInput.value;
             if (command.trim() !== "") {
-                // Печатаем введенную строку в стиле терминала
                 addToOutput(`user@unknown:~$ ${command}`);
                 processCommand(command);
             }
-            commandInput.value = '';  // очищаем поле
-            // Оставляем фокус
+            commandInput.value = '';
             commandInput.focus();
         }
     });
 
-    // Фокус на странице — автоматически ставим курсор в поле ввода
     document.body.addEventListener('click', () => {
         commandInput.focus();
     });
     commandInput.focus();
 
-    // Небольшая вступительная подсказка - можно показать первый скрытый намёк через 3 секунды
     setTimeout(() => {
         addToOutput(">>> [СИСТЕМНЫЙ ШЕПОТ] Воспоминания активируются.... Похоже, бывший владелец оставил скрытые команды. Ищите подсказки внутри файлов diary.", "secret");
     }, 1800);
