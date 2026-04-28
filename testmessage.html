@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>старый телефон</title>
+    <style>
+        body {
+            background-color: #0a0f1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .phone {
+            max-width: 400px;
+            background: #1a1f2a;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid #2a2f3a;
+        }
+        .screen {
+            background: #0a0c12;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 400px;
+            color: #8db5e5;
+            text-shadow: 0 0 3px #003366;
+        }
+        textarea {
+            width: 100%;
+            background: #121620;
+            border: 1px solid #2a3a5a;
+            color: #8db5e5;
+            font-family: 'Courier New', monospace;
+            padding: 12px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        button {
+            background: #1e2a3a;
+            border: 1px solid #3a5a7a;
+            color: #8db5e5;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2a3a4a;
+            border-color: #5a8aba;
+            text-shadow: 0 0 5px #5a8aba;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #4a6a8a;
+            text-align: center;
+        }
+        h3 {
+            margin-top: 0;
+            text-align: center;
+            color: #aaccee;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone">
+        <div class="screen">
+            <h3>📟 ВХОДЯЩИЕ СООБЩЕНИЯ: НЕТ</h3>
+            <p style="font-size: 12px; opacity: 0.7;">━━━━━━━━━━━━━━━━━━━</p>
+            <p style="font-style: italic;">Ты нашёл этот телефон в пустой комнате. Экран горит.<br>Может быть, кто-то когда-нибудь прочитает то, что ты здесь оставишь.</p>
+            <p style="font-size: 12px; opacity: 0.5;">─────────────────</p>
+            <textarea id="message" rows="4" placeholder="Напиши что-нибудь... кому-то... или никому..."></textarea>
+            <button id="sendBtn">📨 ОТПРАВИТЬ В ПУСТОТУ</button>
+            <div class="status" id="status">жду...</div>
+        </div>
+    </div>
+
+    <script>
+        // СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwK4nHsFotRcbk0NVpt6bMGiEnwtrl18QiJNGSV_Vfpu_vCQHHutwUWgcklc9co06ro/exec';
+        
+        const sendBtn = document.getElementById('sendBtn');
+        const messageField = document.getElementById('message');
+        const statusDiv = document.getElementById('status');
+
+        sendBtn.addEventListener('click', async () => {
+            const message = messageField.value.trim();
+            
+            if (!message) {
+                statusDiv.innerHTML = '❄️ поле пусто. напиши что-нибудь...';
+                statusDiv.style.color = '#cc8866';
+                return;
+            }
+
+            statusDiv.innerHTML = '📡 отправляю в пустоту...';
+            statusDiv.style.color = '#aaccee';
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                // из-за mode: 'no-cors' мы не можем прочитать ответ,
+                // но запрос ушёл — это главное
+                statusDiv.innerHTML = '✨ сообщение ушло. тишина... ответ придёт, может быть.';
+                statusDiv.style.color = '#88ccaa';
+                messageField.value = '';
+                
+                // через 5 секунд вернуть стандартный статус
+                setTimeout(() => {
+                    if (statusDiv.innerHTML.includes('ушло')) {
+                        statusDiv.innerHTML = 'жду...';
+                        statusDiv.style.color = '#4a6a8a';
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                statusDiv.innerHTML = '❌ что-то сломалось. но пустота всё равно услышала. попробуй ещё раз.';
+                statusDiv.style.color = '#cc8866';
+            }
+        });
+    </script>
+</body>
+</html>
