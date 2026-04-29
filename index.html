@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Терминал ARG: Забытый компьютер</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARG :: Терминал доступа [v0.1]</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            background-color: #000000;
+            background-color: #03070f;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -21,333 +21,366 @@
             padding: 20px;
         }
 
-        .terminal {
+        /* Экран монитора */
+        .crt {
+            width: 900px;
+            max-width: 100%;
+            height: 600px;
             background-color: #000000;
-            width: 100%;
-            max-width: 800px;
-            height: 500px;
-            border: 2px solid #3a6a7a;
+            border: 2px solid #14f0f0;
             border-radius: 12px;
-            box-shadow: 0 0 15px rgba(170, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
         }
 
-        .terminal::before {
-            content: "";
+        /* Эффект ЭЛТ (старых мониторов) */
+        .crt::before {
+            content: " ";
+            display: block;
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(170, 240, 255, 0.02) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 255, 0.03) 0px,
+                rgba(0, 255, 255, 0.03) 2px,
+                transparent 2px,
+                transparent 6px
+            );
             pointer-events: none;
             z-index: 2;
         }
 
+        /* Шапка с индикатором */
         .terminal-header {
+            background-color: #0a1a1a;
             padding: 8px 15px;
-            background: #0a1a1f;
-            border-bottom: 1px solid #1a4a5a;
+            border-bottom: 1px solid #14f0f0;
             display: flex;
             justify-content: space-between;
-            color: #7ab3c2;
-            font-size: 13px;
+            color: #7ff5f5;
+            font-size: 14px;
             font-weight: bold;
             letter-spacing: 1px;
         }
 
-        .title {
-            text-shadow: 0 0 3px #3a8a9a;
+        .blink {
+            background-color: #14f0f0;
+            color: black;
+            padding: 0 6px;
+            animation: blink-animation 1s step-end infinite;
         }
 
-        .status {
-            font-size: 11px;
+        @keyframes blink-animation {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
-        .output-area {
+        /* Область вывода логов (где появляются записи) */
+        .terminal-output {
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            color: #aaf0ff;
-            font-size: 14px;
+            color: #add8e6; /* Бледно-голубой */
+            font-size: 15px;
             line-height: 1.5;
-            font-weight: 400;
-            text-shadow: 0px 0px 1px #00ccff88;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        .output-area::-webkit-scrollbar {
+        /* Стили для системных сообщений и команд */
+        .prompt {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .command-line {
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            background-color: #000000;
+            border-top: 1px solid #1a3b3b;
+            padding: 10px;
+        }
+
+        .prompt-label {
+            color: #00ffff;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: #add8e6;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            flex: 1;
+            outline: none;
+            caret-color: #00ffff;
+        }
+
+        /* Кастомный скролл */
+        .terminal-output::-webkit-scrollbar {
             width: 6px;
         }
-        .output-area::-webkit-scrollbar-track {
-            background: #0a1a1f;
+        .terminal-output::-webkit-scrollbar-track {
+            background: #000000;
         }
-        .output-area::-webkit-scrollbar-thumb {
-            background: #2a6a7a;
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: #14f0f0;
             border-radius: 3px;
         }
 
-        .input-line {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            background: #030c0e;
-            border-top: 1px solid #1a4a5a;
-            font-size: 14px;
-        }
-
-        .prompt {
-            color: #5fbfcf;
-            font-weight: bold;
-            margin-right: 10px;
-            white-space: nowrap;
-        }
-
-        .input-field {
-            background: transparent;
-            border: none;
-            color: #aaf0ff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            flex: 1;
-            outline: none;
-            caret-color: #6fdfef;
-        }
-
-        .hint {
-            color: #2a8a9a;
+        /* Подсказка */
+        .help-tip {
             font-size: 11px;
-            margin-top: 10px;
-            border-top: 1px dashed #1a4a5a;
-            padding-top: 8px;
-        }
-
-        .secret {
-            color: #ffdd77;
-            text-shadow: 0 0 1px #ffaa33;
-        }
-        .warning {
-            color: #ff8877;
-        }
-        .entry-title {
-            color: #88ddff;
-            font-weight: bold;
-            margin-top: 5px;
+            color: #3a6e6e;
+            text-align: center;
+            border-top: 1px solid #111;
+            padding: 4px;
         }
     </style>
 </head>
 <body>
-<div class="terminal">
+<div class="crt">
     <div class="terminal-header">
-        <span class="title">⚡ USER-PC [SECURE_SHELL]</span>
-        <span class="status">ONLINE | v.0.4b</span>
+        <span>SYSTEM://ARG_EMU_V0.1</span>
+        <span>USER: ANON <span class="blink">▲</span></span>
     </div>
-    <div class="output-area" id="outputArea">
-        <div>========================================</div>
-        <div>ДОБРО ПОЖАЛОВАТЬ</div>
-        <div>========================================</div>
-        <div>Система восстановления данных v0.1</div>
-        <div>Введите HELP для списка команд.</div>
-        <div>Исследуйте логи ... возможно, тут есть чей-то дневник.</div>
-        <div>&nbsp;</div>
-        <div>> Система готова.</div>
+    <div class="terminal-output" id="output-area">
+        <div>> Инициализация нейросвязи...</div>
+        <div>> Система загружена. Введите HELP для списка команд.</div>
+        <div>> Доступные протоколы: чтение логов, поиск скрытых данных.</div>
+        <div>> -------------------------------------------------</div>
     </div>
-    <div class="input-line">
-        <span class="prompt">user@unknown:~$</span>
-        <input type="text" class="input-field" id="commandInput" autofocus>
+    <div class="command-line">
+        <span class="prompt-label">[guest@sys] $&gt;</span>
+        <input type="text" id="command-input" autofocus>
+    </div>
+    <div class="help-tip">
+        📟 Команды: help | ls | read [файл] | find [ключ] | secret | strings | clear
     </div>
 </div>
 
 <script>
-    const filesystem = {
-        "readme.txt": "Этот терминал содержит архивы пользователя. Попробуй: LIST, CAT <file>, кроме того, есть секретные методы.",
-        "diary_01.txt": "[ЗАПИСЬ #1] 20 декабря. Странно. В это месте время идёт иначе. Пространство также искажено. Возможно, этого места не существует. Код доступа? Может быть, 's3cr3t'?",
-        "diary_02.txt": "[ЗАПИСЬ #2] Слишком холодно. Глубокое хроническое одиночество. Это серьёзнее чем может показаться. Представь что находишься в бесконечном космическом пространстве. Ты можешь слышать других людей по рации, их голоса и образы. Но ты не можешь присоединиться.",
-        "diary_03.txt": "[ЗАПИСЬ #3] Мои идеи никому не нужны. Я пытаюсь создать изобретение что могло бы поменять жизнь людей к лучшему, но в одиночку на это у меня уйдёт вся жизнь. Здесь никого нет. Я один. Никто не хочет слушать меня... Нет, тут кто-то есть, просто я ещё не нашёл. Если кто-то читает это, введите 'SHADOW' - возможно, вы найдёте что-то важное. Надеюсь это вам поможет, путник. Будьте осторожны. Берегите себя.",
-        "diary_04.txt": "[ЗАПИСЬ #4] Из тысячи отправленных сообщений, только на одно пришёл ответ. Я думал что не существую, до этого момента.",
-        "log_system.log": "[СИСТЕМА] 2024-04-21 : Обнаружены аномальные запросы / ВНИМАНИЕ! / Ищешь правду? (введи 'ROOT_ACCESS')",
-        "note_private.txt": "==== ЛИЧНОЕ ==== \nЯ чувствую вину. Я прячу 'ключ' в простой фразе: \"LS -LA\" покажет скрытую директорию, а команда 'RECOVER' восстановит последний фрагмент дневника.",
+    
+    const FILESYSTEM = {
+        "diary.txt": "=== ЛИЧНЫЙ ДНЕВНИК [ДАТА: 2016-11-28] ===\n[Сегодня очень холодно.]\nОтвет так и не был получен...\n...",
+        "messages.log": "=== ЖУРНАЛ СООБЩЕНИЙ (СЕРВЕР M-23) ===\n[ТВОИ СЕКРЕТНЫЕ ПЕРЕПИСКИ]\n> Отправитель: ???\n> Получатель: UNKNOWN\n> Текст: Я спрятал ключ под ...\n",
+        "notes.txt": "[ЗАМЕТКИ РУКОЙ]\nГлавный: ...\nКоординаты: ...\n[Возможно, для этого эксперемента потребуется шифровать данные]",
+        "syslog.bin": "SYS_DATA:0x00 0xFF [МУСОР] TRACE: Уровень доступа. [СПРЯТАННОЕ СООБЩЕНИЕ] Продолжение следует..."
     };
 
-    const hiddenEntries = {
-        ".secret_angel": "[ЗАШИФРОВАННОЕ ПОСЛАНИЕ] ",
-        ".final_confession": "====== ПОСЛЕДНЯЯ ЗАПИСЬ ======\nДневник обрывается. Я спрятал правду в изображении, но компьютер помнит пароль: WHL0137-LS",
-        "hidden_cmd_list": "Секретные команды, которые работают в этом терминале:\n- SHADOW\n- UNLOCK MEMORY\n- ROOT_ACCESS\n- RECOVER\n- LS -LA (псевдоним)\n- HELP (обычная помощь)"
+    // СПИСОК СЕКРЕТНЫХ КОМАНД (пасхалки, которые ведут к разгадке)
+    const SECRET_COMMANDS = {
+        "mem_dump": "🔍 ДАМП ПАМЯТИ: Обнаружена странная строка в кеше процессора: 'ТЫ НАШЕЛ ТО, ЧТО НЕ ПРЕДНАЗНАЧАЛОСЬ'.",
+        "void_access": "⚠️ СИСТЕМНЫЙ ЖУРНАЛ: В 03:15 была попытка входа с неизвестного терминала. Сообщение: 'key 48'.",
+        "decrypt_key": "💠 КЛЮЧ РАСШИФРОВКИ: A5-9F-2C-77. Записи дневника скрыты в нулевом секторе.",
+        "last_will": "📜 ЗАПИСЬ: 'Если ты читаешь это, не теряй времени. Истина в файле hidden.dat'."
     };
 
-    const outputArea = document.getElementById('outputArea');
-    const commandInput = document.getElementById('commandInput');
+    const outputDiv = document.getElementById('output-area');
+    const inputField = document.getElementById('command-input');
+    let commandHistory = [];
+    let historyIndex = -1;
 
-    function addToOutput(text, className = "") {
+    function appendToTerminal(text, isError = false) {
         const line = document.createElement('div');
-        if (className) {
-            line.className = className;
+        if (isError) {
+            line.style.color = "#f0a0a0";
+            line.innerHTML = `⚠️ ${text}`;
+        } else {
+            line.innerHTML = text;
         }
-        line.innerText = text;
-        outputArea.appendChild(line);
-        outputArea.scrollTop = outputArea.scrollHeight;
+        outputDiv.appendChild(line);
+        // Автоскролл вниз
+        line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function clearOutput() {
-        outputArea.innerHTML = '';
-        addToOutput("> Очистка экрана...");
-        addToOutput("> Терминал готов.", "hint");
+    function listFiles() {
+        const files = Object.keys(FILESYSTEM);
+        appendToTerminal("📁 Доступные файлы для чтения:");
+        files.forEach(file => {
+            appendToTerminal(`   - ${file}`);
+        });
+        appendToTerminal("(Используйте 'read [имя_файла]' чтобы открыть)");
     }
 
-    function processCommand(cmd) {
-        const trimmed = cmd.trim().toLowerCase();
-        const original = cmd.trim();
+    // Чтение файла
+    function readFile(filename) {
+        const file = FILESYSTEM[filename];
+        if (file) {
+            appendToTerminal(`\n📄 Содержимое ${filename}:\n${file}\n`);
+        } else {
+            appendToTerminal(`Файл "${filename}" не найден. Попробуйте ls.`, true);
+        }
+    }
+
+    function findKeyword(keyword) {
+        if (!keyword || keyword.length < 2) {
+            appendToTerminal("Использование: find [слово] (минимум 2 символа)", true);
+            return;
+        }
+        let found = false;
+        for (const [filename, content] of Object.entries(FILESYSTEM)) {
+            if (content.toLowerCase().includes(keyword.toLowerCase())) {
+                appendToTerminal(`🔎 Найдено в "${filename}":\n   ...${content.substring(0, 150)}...`);
+                found = true;
+            }
+        }
+        // Проверка также в секретных командах (как подсказка)
+        for (const [cmd, secretText] of Object.entries(SECRET_COMMANDS)) {
+            if (secretText.toLowerCase().includes(keyword.toLowerCase())) {
+                appendToTerminal(`🔮 Скрытая подсказка в системной области (команда: ${cmd}):\n   ${secretText}`);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            appendToTerminal(`По запросу "${keyword}" ничего не найдено. Попробуйте 'strings' для сырого поиска.`);
+        }
+    }
+
+    // Команда STRINGS – эмуляция вытаскивания читаемых строк из «мусора»
+    function stringsDump() {
+        appendToTerminal("=== ВЫПОЛНЯЮ STRINGS НАД СИСТЕМНЫМ ОБРАЗОМ ===\n[Извлечение ASCII последовательностей...]");
+        const hiddenMessages = [
+            "[СЕКРЕТ] Важно: тебе понадобиться способ расшифровки странных символов",
+            "[LOG] Наблюдения астрономии: 'Луч света говорит правду'",
+            "[SYSTEM] Удалено: 'Помни, ЧТО ТЫ ВИДЕЛ'",
+            "Дневник: Хорошо что ты нашёл это. Запомни что... ",
+            "#!/bin/sh Сообщение от Admin: проверьте ячейку №7"
+        ];
         
-        if (trimmed === "") {
-            addToOutput("");
-            return;
-        }
-
-        if (trimmed === "help") {
-            addToOutput("Доступные команды:", "entry-title");
-            addToOutput("  LIST          - показать все доступные файлы (дневник, логи)", "hint");
-            addToOutput("  CAT <file>    - прочитать содержимое файла", "hint");
-            addToOutput("  CLEAR         - очистить экран терминала", "hint");
-            addToOutput("  TIME          - показать системное время (но может быть странным)", "hint");
-            addToOutput("  WHOAMI        - отобразить текущего пользователя", "hint");
-            addToOutput("  HELP          - это сообщение", "hint");
-            addToOutput("  === СЕКРЕТНЫЕ КОМАНДЫ (попробуйте найти сами) ===", "secret");
-            return;
-        }
-
-        if (trimmed === "list") {
-            addToOutput("=== Доступные файлы в текущей директории ===", "entry-title");
-            for (let file in filesystem) {
-                addToOutput(`  📄 ${file}`, "hint");
-            }
-            addToOutput("=== Конец списка. Возможно, есть скрытое содержимое? ===", "entry-title");
-            addToOutput("В некоторых файлах есть...", "warning");
-            return;
-        }
-
-        if (trimmed.startsWith("cat ")) {
-            const fileName = original.substring(4).trim();
-            if (filesystem[fileName]) {
-                let content = filesystem[fileName];
-                addToOutput(`=== Содержимое ${fileName} ===`, "entry-title");
-                const lines = content.split('\n');
-                lines.forEach(line => {
-                    if (line.includes("s3cr3t") || line.includes("SHADOW") || line.includes("ROOT_ACCESS") || line.includes("RECOVER")) {
-                        addToOutput(line, "secret");
-                    } else {
-                        addToOutput(line);
-                    }
-                });
-                addToOutput("=== Конец файла ===", "entry-title");
-            } else if (hiddenEntries[fileName]) {
-                addToOutput(`=== [СКРЫТЫЙ ФАЙЛ] ${fileName} ===`, "secret");
-                addToOutput(hiddenEntries[fileName], "secret");
-                addToOutput("Вы нашли тайный фрагмент!", "secret");
-            } else {
-                addToOutput(`Ошибка: файл "${fileName}" не найден. Попробуйте LIST.`, "warning");
-            }
-            return;
-        }
-
-        if (trimmed === "time") {
-            const now = new Date();
-            addToOutput(`Системное время ARG: ${now.toLocaleString()}`, "hint");
-            addToOutput("Но внутренние часы компьютера сбиты... возможно, важна дата в записях.", "warning");
-            return;
-        }
-
-        if (trimmed === "whoami") {
-            addToOutput("guest_user (уровень доступа: ограниченный)");
-            addToOutput("Но сессия имеет следы предыдущего хозяина: 'North.'", "secret");
-            return;
-        }
-
-        if (trimmed === "clear") {
-            clearOutput();
-            return;
-        }
-        
-        if (trimmed === "shadow") {
-            addToOutput(">>> [СИСТЕМА РАСШИФРОВКИ] <<<", "secret");
-            addToOutput("Координаты убежища: 47.3769° N, 8.5417° E", "secret");
-            addToOutput("Это подсказка для внешнего мира. Следуй за тенью.", "secret");
-            addToOutput("(В дневнике было предупреждение...)", "warning");
-            return;
-        }
-
-        if (trimmed === "unlock memory") {
-            addToOutput("ВВЕДЕН КОД РАЗБЛОКИРОВКИ ПАМЯТИ", "secret");
-            addToOutput("Извлечение скрытой записи #X:", "entry-title");
-            addToOutput("«Ты нашел послание. В реальном мире найди ключ: 'TERMINAL_ECHO'»", "secret");
-            addToOutput("Также теперь доступен скрытый файл: .secret_angel (используй CAT .secret_angel)", "hint");
-            return;
-        }
-
-        if (trimmed === "root_access") {
-            addToOutput("РЕЖИМ ROOT АКТИВИРОВАН (ЭМУЛЯЦИЯ)", "warning");
-            addToOutput("Секретный дамп конфигурации:", "entry-title");
-            addToOutput("> HINT: секретная команда 'LS -LA' покажет настоящие скрытые файлы.", "secret");
-            addToOutput("> Админский бэкдор: введите 'RECOVER' для последнего сообщения.", "secret");
-            return;
-        }
-
-        if (trimmed === "recover") {
-            addToOutput("ЗАПУСК ПРОЦЕДУРЫ ВОССТАНОВЛЕНИЯ...", "warning");
-            addToOutput(hiddenEntries[".final_confession"], "secret");
-            addToOutput("Теперь вы можете прочитать и другие скрытые файлы, если знаете их имена.", "hint");
-            addToOutput("Попробуйте: CAT .final_confession или CAT .secret_angel", "hint");
-            return;
-        }
-
-        if (trimmed === "ls -la") {
-            addToOutput("Показываю все объекты (включая скрытые):", "entry-title");
-            for (let f in filesystem) {
-                addToOutput(`  -rw-r--r--   ${f}`, "hint");
-            }
-            addToOutput("  [СКРЫТЫЕ]:", "secret");
-            for (let h in hiddenEntries) {
-                addToOutput(`  . (скрытый)  ${h}`, "secret");
-            }
-            addToOutput("Используйте CAT <имя_скрытого_файла> для чтения.", "hint");
-            return;
-        }
-
-        if (trimmed === "diary") {
-            addToOutput("=== Полный список дневников ===");
-            addToOutput("diary_01.txt, diary_02.txt, diary_03.txt, diary_04.txt", "hint");
-            addToOutput("Также есть скрытая команда 'SHADOW' и 'UNLOCK MEMORY'", "secret");
-            return;
-        }
-
-        addToOutput(`Неизвестная команда: "${original}". Введите HELP.`, "warning");
+        const shuffled = [...hiddenMessages].sort(() => 0.5 - Math.random());
+        shuffled.slice(0, 3).forEach(msg => {
+            appendToTerminal(`   🧩 STRINGS: ${msg}`);
+        });
+        appendToTerminal("--- Для более точного поиска используйте 'find [слово]' ---");
     }
 
-    commandInput.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            const command = commandInput.value;
-            if (command.trim() !== "") {
-                addToOutput(`user@unknown:~$ ${command}`);
-                processCommand(command);
+    // Обработка секретных команд
+    function execSecret(cmd) {
+        if (SECRET_COMMANDS[cmd]) {
+            appendToTerminal(`🤫 СЕКРЕТНАЯ КОМАНДА РАСПОЗНАНА (${cmd}):\n${SECRET_COMMANDS[cmd]}`);
+            return true;
+        }
+        return false;
+    }
+
+    // Отображение помощи
+    function showHelp() {
+        appendToTerminal("\n=== ДОСТУПНЫЕ КОМАНДЫ ===");
+        appendToTerminal(" help          - Показать эту справку");
+        appendToTerminal(" ls            - Показать список файлов");
+        appendToTerminal(" read [file]   - Прочитать содержимое файла");
+        appendToTerminal(" find [слово]  - Искать по всем файлам и скрытым зонам");
+        appendToTerminal(" strings       - Извлечь скрытые строки из бинарного мусора");
+        appendToTerminal(" clear         - Очистить экран терминала");
+        appendToTerminal(" secret, [cmd] - Запустить секретную команду (см. подсказки find)");
+        appendToTerminal("-------------------------------------------------");
+        appendToTerminal("💡 Подсказка: Попробуйте 'find дневник', 'strings' или введите 'void_access'");
+    }
+
+    function clearScreen() {
+        outputDiv.innerHTML = '';
+        appendToTerminal("> Экран очищен. Введите help для команд.");
+        appendToTerminal("> -------------------------------------------------");
+    }
+
+    // Главная обработка команд
+    function processCommand(input) {
+        let trimmed = input.trim().toLowerCase();
+        if (trimmed === "") return;
+
+        // Показываем введённую команду (как в настоящем терминале)
+        appendToTerminal(`[guest@sys] $&gt; ${input}`);
+
+        // Разбор
+        const parts = trimmed.split(/\s+/);
+        const command = parts[0];
+        const args = parts.slice(1);
+
+        // Проверка на секретные команды (до стандартных, чтобы не блокировать)
+        if (execSecret(command)) {
+            return;
+        }
+
+        switch (command) {
+            case "help":
+                showHelp();
+                break;
+            case "ls":
+                listFiles();
+                break;
+            case "read":
+                if (args.length === 0) {
+                    appendToTerminal("Укажите имя файла. Например: read diary.txt", true);
+                } else {
+                    readFile(args[0]);
+                }
+                break;
+            case "find":
+                if (args.length === 0) {
+                    appendToTerminal("Что ищем? Используйте: find [слово]", true);
+                } else {
+                    findKeyword(args.join(" "));
+                }
+                break;
+            case "strings":
+                stringsDump();
+                break;
+            case "clear":
+                clearScreen();
+                break;
+            case "secret":
+                appendToTerminal("Используйте конкретные ключи, например 'void_access' или 'mem_dump' (получены через find)");
+                break;
+            default:
+                appendToTerminal(`Ошибка: '${command}' не является внутренней или внешней командой. Введите help.`, true);
+                break;
+        }
+    }
+
+    // События ввода (Enter и стрелки для истории)
+    inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const cmd = inputField.value;
+            if (cmd.trim() !== "") {
+                commandHistory.push(cmd);
+                historyIndex = commandHistory.length;
+                processCommand(cmd);
+                inputField.value = "";
             }
-            commandInput.value = '';
-            commandInput.focus();
+            e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+            if (commandHistory.length > 0 && historyIndex > 0) {
+                historyIndex--;
+                inputField.value = commandHistory[historyIndex];
+            }
+            e.preventDefault();
+        } else if (e.key === 'ArrowDown') {
+            if (historyIndex < commandHistory.length - 1) {
+                historyIndex++;
+                inputField.value = commandHistory[historyIndex];
+            } else if (historyIndex === commandHistory.length - 1) {
+                historyIndex++;
+                inputField.value = "";
+            }
+            e.preventDefault();
         }
     });
 
     document.body.addEventListener('click', () => {
-        commandInput.focus();
+        inputField.focus();
     });
-    commandInput.focus();
-
-    setTimeout(() => {
-        addToOutput(">>> [СИСТЕМНЫЙ ШЕПОТ] Воспоминания активируются.... Похоже, бывший владелец оставил скрытые команды. Ищите подсказки внутри файлов diary.", "secret");
-    }, 1800);
+    inputField.focus();
 </script>
 </body>
 </html>
