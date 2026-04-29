@@ -73,6 +73,7 @@ document.getElementById('checkBtn').onclick = async () => {
         responseArea.innerHTML = '';
         statusDiv.innerHTML = 'ответа пока нет. пустота ещё думает. загляни позже.';
     }
+    statusDiv.innerHTML = `✨ Отправлено! Твой звёздный позывной: <strong>${result.code}</strong><br>Сохрани его. Вернись с ним за ответом.`;
 };
 </script>
 </body>
