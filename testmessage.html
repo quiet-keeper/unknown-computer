@@ -1,80 +1,172 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>старый телефон</title>
+    <meta charset="UTF-8">
+    <title>старый телефон — письма в пустоту</title>
     <style>
-        /* здесь твои стили, из предыдущего кода, оставляем как есть */
+        body {
+            background: #0a0c12;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .phone {
+            max-width: 450px;
+            background: #1a1f2a;
+            border-radius: 30px;
+            padding: 20px;
+            border: 1px solid #2a2f3a;
+        }
+        .screen {
+            background: #0a0c12;
+            border-radius: 20px;
+            padding: 20px;
+            color: #8db5e5;
+        }
+        textarea, input {
+            width: 100%;
+            background: #121620;
+            border: 1px solid #2a3a5a;
+            color: #8db5e5;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 8px 0;
+        }
+        button {
+            background: #1e2a3a;
+            border: 1px solid #3a5a7a;
+            color: #8db5e5;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .divider {
+            margin: 20px 0;
+            border-top: 1px dashed #2a3a5a;
+        }
+        .status {
+            font-size: 12px;
+            color: #6a8aaa;
+            margin-top: 10px;
+        }
+        .response-box {
+            background: #0a1a2a;
+            border-left: 3px solid #5a9aba;
+            padding: 10px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+        .star-code {
+            font-weight: bold;
+            color: #ffcc88;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
 <div class="phone">
     <div class="screen">
         <h3>📟 СТАРЫЙ ТЕЛЕФОН</h3>
+        <p style="font-size: 12px;">этот аппарат помнит голоса тех, кто был один. оставь свой след.</p>
 
-        <div id="newMessageSection">
-            <textarea id="message" rows="4" placeholder="напиши что хочешь. в пустоту."></textarea>
-            <button id="sendBtn">отправить</button>
-        </div>
+        <!-- === ОТПРАВКА ПИСЬМА === -->
+        <textarea id="newMessage" rows="4" placeholder="напиши что хочешь... кому-то в пустоту..."></textarea>
+        <button id="sendBtn">📨 отправить</button>
+        <div id="sendStatus" class="status"></div>
 
-        <hr />
+        <div class="divider"></div>
 
-        <div id="checkResponseSection">
-            <input type="text" id="codeInput" placeholder="код письма" style="width: 70%; background: #121620; border:1px solid #2a3a5a; color:#8db5e5; padding: 8px;" />
-            <button id="checkBtn">проверить ответ</button>
-        </div>
-
-        <div id="status" class="status"></div>
-        <div id="responseArea" class="status" style="margin-top: 20px; white-space: pre-wrap;"></div>
+        <!-- === ПРОВЕРКА ОТВЕТА === -->
+        <input type="text" id="letterId" placeholder="введи звёздный позывной (например, HD 73124-0426)">
+        <button id="checkBtn">📬 проверить ответ</button>
+        <div id="checkStatus" class="status"></div>
+        <div id="responseContent" class="response-box" style="display: none;"></div>
     </div>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/ТВОЯ_ССЫЛКА/exec';
-
-document.getElementById('sendBtn').onclick = async () => {
-    const message = document.getElementById('message').value;
-    if (!message) return;
-
-    const statusDiv = document.getElementById('status');
-    statusDiv.innerHTML = 'отправляю...';
-
-    const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ message: message }),
-    });
-    const result = await response.json();
-
-    if (result.success) {
-        statusDiv.innerHTML = `отправлено. сохрани код: <strong>${result.code}</strong><br>вернись с ним за ответом.`;
-        document.getElementById('message').value = '';
-    } else {
-        statusDiv.innerHTML = 'ошибка. попробуй ещё.';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlZA55V1R-N17owF_slHhZjylw-Jlcpi1_NTbXAhdtiMczSmM1GCo70oH4VNU90suO/exec';
+    
+    // Отправка нового письма
+    document.getElementById('sendBtn').onclick = async () => {
+        const message = document.getElementById('newMessage').value.trim();
+        if (!message) {
+            document.getElementById('sendStatus').innerHTML = '❄️ поле пусто...';
+            return;
+        }
+        
+        document.getElementById('sendStatus').innerHTML = '📡 отправляю...';
+        
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ message: message })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                document.getElementById('sendStatus').innerHTML = 
+                    `✨ отправлено! твой звёздный позывной: <span class="star-code">${result.code}</span><br>
+                     сохрани его. вернись с ним за ответом.`;
+                document.getElementById('newMessage').value = '';
+            } else {
+                document.getElementById('sendStatus').innerHTML = '❌ ошибка. попробуй ещё.';
+            }
+        } catch (error) {
+            document.getElementById('sendStatus').innerHTML = '❌ не получилось отправить.';
+        }
+    };
+    
+    // Проверка ответа
+    document.getElementById('checkBtn').onclick = async () => {
+        const code = document.getElementById('letterId').value.trim();
+        if (!code) return;
+        
+        document.getElementById('checkStatus').innerHTML = '🔍 ищу ответ...';
+        document.getElementById('responseContent').style.display = 'none';
+        
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ checkCode: code })
+            });
+            
+            const result = await response.json();
+            
+            if (result.hasResponse) {
+                document.getElementById('responseContent').innerHTML = 
+                    `<strong>✨ ответ из пустоты:</strong><br>${escapeHtml(result.response)}`;
+                document.getElementById('responseContent').style.display = 'block';
+                document.getElementById('checkStatus').innerHTML = '';
+            } else if (result.error) {
+                document.getElementById('checkStatus').innerHTML = '❌ ошибка проверки.';
+            } else {
+                document.getElementById('checkStatus').innerHTML = '⏳ ответа пока нет. пустота думает. загляни позже.';
+            }
+        } catch (error) {
+            document.getElementById('checkStatus').innerHTML = '❌ ошибка проверки.';
+        }
+    };
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/\n/g, '<br>');
     }
-};
-
-document.getElementById('checkBtn').onclick = async () => {
-    const code = document.getElementById('codeInput').value.trim();
-    if (!code) return;
-
-    const statusDiv = document.getElementById('status');
-    const responseArea = document.getElementById('responseArea');
-    statusDiv.innerHTML = 'ищу ответ...';
-
-    const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ checkCode: code }),
-    });
-    const result = await response.json();
-
-    if (result.hasResponse) {
-        responseArea.innerHTML = `📨 ответ из пустоты:<br>${result.response}`;
-        statusDiv.innerHTML = '';
-    } else {
-        responseArea.innerHTML = '';
-        statusDiv.innerHTML = 'ответа пока нет. пустота ещё думает. загляни позже.';
-    }
-    statusDiv.innerHTML = `✨ Отправлено! Твой звёздный позывной: <strong>${result.code}</strong><br>Сохрани его. Вернись с ним за ответом.`;
-};
 </script>
 </body>
 </html>
