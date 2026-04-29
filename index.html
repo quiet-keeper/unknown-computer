@@ -21,7 +21,6 @@
             padding: 20px;
         }
 
-        /* Экран монитора */
         .crt {
             width: 900px;
             max-width: 100%;
@@ -36,7 +35,6 @@
             position: relative;
         }
 
-        /* Эффект ЭЛТ (старых мониторов) */
         .crt::before {
             content: " ";
             display: block;
@@ -56,7 +54,6 @@
             z-index: 2;
         }
 
-        /* Шапка с индикатором */
         .terminal-header {
             background-color: #0a1a1a;
             padding: 8px 15px;
@@ -76,27 +73,25 @@
             animation: blink-animation 1s step-end infinite;
         }
 
+        .error-blink {
+            color: #ff6666;
+            animation: blink-animation 1.5s step-end infinite;
+        }
+
         @keyframes blink-animation {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
 
-        /* Область вывода логов (где появляются записи) */
         .terminal-output {
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            color: #add8e6; /* Бледно-голубой */
+            color: #add8e6;
             font-size: 15px;
             line-height: 1.5;
             white-space: pre-wrap;
             word-break: break-word;
-        }
-
-        /* Стили для системных сообщений и команд */
-        .prompt {
-            color: #00ffff;
-            font-weight: bold;
         }
 
         .command-line {
@@ -125,7 +120,6 @@
             caret-color: #00ffff;
         }
 
-        /* Кастомный скролл */
         .terminal-output::-webkit-scrollbar {
             width: 6px;
         }
@@ -137,7 +131,6 @@
             border-radius: 3px;
         }
 
-        /* Подсказка */
         .help-tip {
             font-size: 11px;
             color: #3a6e6e;
@@ -151,7 +144,7 @@
 <div class="crt">
     <div class="terminal-header">
         <span>SYSTEM://ARG_EMU_V0.1</span>
-        <span>USER: ANON <span class="blink">▲</span></span>
+        <span>🌐 NETWORK: <span class="error-blink">⚠️ ОШИБКА [UNKNOWN]</span> ★ <span class="blink">▲</span></span>
     </div>
     <div class="terminal-output" id="output-area">
         <div>> Инициализация нейросвязи...</div>
@@ -164,25 +157,73 @@
         <input type="text" id="command-input" autofocus>
     </div>
     <div class="help-tip">
-        📟 Команды: help | ls | read [файл] | find [ключ] | secret | strings | clear
+        📟 Команды: help | ls | read [файл] | find [ключ] | strings | why? | clear
     </div>
 </div>
 
 <script>
-    
+
     const FILESYSTEM = {
-        "diary.txt": "=== ЛИЧНЫЙ ДНЕВНИК [ДАТА: 2016-11-28] ===\n[Сегодня очень холодно.]\nОтвет так и не был получен...\n...",
-        "messages.log": "=== ЖУРНАЛ СООБЩЕНИЙ (СЕРВЕР M-23) ===\n[ТВОИ СЕКРЕТНЫЕ ПЕРЕПИСКИ]\n> Отправитель: ???\n> Получатель: UNKNOWN\n> Текст: Я спрятал ключ под ...\n",
-        "notes.txt": "[ЗАМЕТКИ РУКОЙ]\nГлавный: ...\nКоординаты: ...\n[Возможно, для этого эксперемента потребуется шифровать данные]",
-        "syslog.bin": "SYS_DATA:0x00 0xFF [МУСОР] TRACE: Уровень доступа. [СПРЯТАННОЕ СООБЩЕНИЕ] Продолжение следует..."
+        "diary.txt": `=== ДНЕВНИК ===
+
+[ЗАПИСЬ #1 | 2016-11-28]
+Сегодня очень холодно. Ответ так и не был получен... 
+Может быть, я ищу не там?
+
+[ЗАПИСЬ #2 | 2016-12-03]
+Мои идеи слишком сложные и их тяжело понять. 
+
+[ЗАПИСЬ #3 | 2016-12-15]
+П
+
+[ЗАПИСЬ #4 | 2016-12-21]
+Сегодня я понял, что за мной следят. Не физически — через сеть.
+Кто-то читает мои файлы. Нужно спрятать самое важное.
+
+[ЗАПИСЬ #5 | 2016-12-31]
+Только задавая вопросы мы можем узнать истину или приблизиться к правде`,
+
+        "messages.log": `=== ЖУРНАЛ СООБЩЕНИЙ (СЕРВЕР M-23) ===
+
+[16:47:02] > Отправитель: UNKNOWN
+[16:47:02] > Получатель: ANON
+[16:47:02] > Текст: Друг, у тебя очень уникальные работы. Возможно ты будущий гений.
+
+[23:15:44] > Отправитель: ANON
+[23:15:44] > Получатель: UNKNOWN
+[23:15:44] > Текст: Кто ты? Откуда у тебя моя почта?
+
+[23:16:01] > Отправитель: UNKNOWN
+[23:16:01] > Текст: Не переживай, я просто наткнулся на неё под одним из моих старых постов на форуме. Спасибо что помог мне тогда. `,
+
+        "notes.txt": `[ЗАМЕТКИ РУКОЙ]
+
+Главный пароль: [НЕ РАЗОБРАТЬ]
+Подсказка: hex(11) = B, hex(25) = ?
+Что-то не так с этой системой. Данные повреждаются при записи.
+
+Возможно, для этого эксперимента потребуется шифровать данные.`,
+
+        "syslog.bin": `SYS_DATA:0x00 0xFF [МУСОР] 0xDE 0xAD 0xBE 0xEF
+TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
+[СПРЯТАННОЕ СООБЩЕНИЕ] 
+4d 61 72 6b 20 62 65 67 69 6e 73 20 77 69 74 68 20 74 68 65 20 73 6b 79
+Продолжение следует...`
     };
 
-    // СПИСОК СЕКРЕТНЫХ КОМАНД (пасхалки, которые ведут к разгадке)
+
+    const HASHED_SECRETS = {
+        "3c6e0b8a9c15224a8228b9a98ca1531d": {
+            response: "Зачем? Я тоже не знаю... Что-то, возможно, скрыто пока от твоих глаз... Но нужно ждать.",
+            hint: "Ты задал правильный вопрос. Иногда ответ приходит не сразу."
+        }
+    };
+
     const SECRET_COMMANDS = {
-        "mem_dump": "🔍 ДАМП ПАМЯТИ: Обнаружена странная строка в кеше процессора: ''.",
-        "void_access": "⚠️ СИСТЕМНЫЙ ЖУРНАЛ: В 03:15 была попытка входа с неизвестного терминала. Сообщение: 'Wait'.",
-        "decrypt_key": "💠 КЛЮЧ РАСШИФРОВКИ: key-48. Записи дневника скрыты.",
-        "last_will": "📜 ЗАПИСЬ: 'Если ты читаешь это, не теряй времени. Возьми свою жизнь в свои руки. Кто-то, возможно, ожидает тебя в том же мраке что и ты."
+        "mem_dump": "🔍 ДАМП ПАМЯТИ: Обнаружена странная строка в кеше процессора: 'Ты на правильном пути'.",
+        "void_access": "⚠️ СИСТЕМНЫЙ ЖУРНАЛ: В 03:15 была попытка входа с неизвестного терминала. Сообщение: 'Смотри глубже'.",
+        "decrypt_key": "💠 КЛЮЧ РАСШИФРОВКИ: 48.",
+        "last_will": "📜 ЗАПИСЬ: 'Если ты читаешь это, не теряй времени. Возьми свою жизнь в свои руки. Кто-то, возможно, ожидает тебя в том же мраке, что и ты.'"
     };
 
     const outputDiv = document.getElementById('output-area');
@@ -199,8 +240,17 @@
             line.innerHTML = text;
         }
         outputDiv.appendChild(line);
-        // Автоскролл вниз
         line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+
+    function md5Hash(input) {
+
+        if (input === "why?") {
+            return "3c6e0b8a9c15224a8228b9a98ca1531d";
+        }
+  
+        return "";
     }
 
     function listFiles() {
@@ -212,7 +262,6 @@
         appendToTerminal("(Используйте 'read [имя_файла]' чтобы открыть)");
     }
 
-    // Чтение файла
     function readFile(filename) {
         const file = FILESYSTEM[filename];
         if (file) {
@@ -234,7 +283,6 @@
                 found = true;
             }
         }
-        // Проверка также в секретных командах (как подсказка)
         for (const [cmd, secretText] of Object.entries(SECRET_COMMANDS)) {
             if (secretText.toLowerCase().includes(keyword.toLowerCase())) {
                 appendToTerminal(`🔮 Скрытая подсказка в системной области (команда: ${cmd}):\n   ${secretText}`);
@@ -247,15 +295,14 @@
         }
     }
 
-    // Команда STRINGS – эмуляция вытаскивания читаемых строк из «мусора»
     function stringsDump() {
         appendToTerminal("=== ВЫПОЛНЯЮ STRINGS НАД СИСТЕМНЫМ ОБРАЗОМ ===\n[Извлечение ASCII последовательностей...]");
         const hiddenMessages = [
-            "[СЕКРЕТ] Важно: тебе понадобиться способ расшифровки странных символов",
+            "[СЕКРЕТ] Важно: тебе понадобится способ расшифровки странных символов",
             "[LOG] Наблюдения астрономии: 'Луч света говорит правду'",
-            "[SYSTEM] Удалено: 'удалено'",
-            "Дневник: Сигнал с Земли достигнет Пояса Койпера через 6,94 часа, Проксимы Центавры через 4 года и 3 месяца, а Андромеды только через 2,5 миллионов лет ",
-            "#!/bin/sh Сообщение от Admin: большинство данных утеряно"
+            "[SYSTEM] Удалено: 'некоторые вопросы не имеют ответов'",
+            "Дневник: Сигнал с Земли достигнет Пояса Койпера через 6,94 часа, Проксимы Центавры через 4 года и 3 месяца, а Андромеды только через 2,5 миллионов лет",
+            "#!/bin/sh Сообщение от Admin: большинство данных утеряно."
         ];
         
         const shuffled = [...hiddenMessages].sort(() => 0.5 - Math.random());
@@ -265,16 +312,29 @@
         appendToTerminal("--- Для более точного поиска используйте 'find [слово]' ---");
     }
 
-    // Обработка секретных команд
+    // Обработка секретных команд (включая хэшированную)
     function execSecret(cmd) {
+        // Проверка обычных секретных команд
         if (SECRET_COMMANDS[cmd]) {
             appendToTerminal(`🤫 СЕКРЕТНАЯ КОМАНДА РАСПОЗНАНА (${cmd}):\n${SECRET_COMMANDS[cmd]}`);
             return true;
         }
+        
+        // Проверка хэшированной команды "why?"
+        const hashed = md5Hash(cmd);
+        if (HASHED_SECRETS[hashed]) {
+            const secret = HASHED_SECRETS[hashed];
+            appendToTerminal(`❓ ВЫ ВВЕЛИ: ${cmd}\n`);
+            appendToTerminal(`📜 ОТВЕТ СИСТЕМЫ:\n${secret.response}\n`);
+            if (secret.hint) {
+                appendToTerminal(`💭 ${secret.hint}`);
+            }
+            return true;
+        }
+        
         return false;
     }
 
-    // Отображение помощи
     function showHelp() {
         appendToTerminal("\n=== ДОСТУПНЫЕ КОМАНДЫ ===");
         appendToTerminal(" help          - Показать эту справку");
@@ -283,9 +343,9 @@
         appendToTerminal(" find [слово]  - Искать по всем файлам и скрытым зонам");
         appendToTerminal(" strings       - Извлечь скрытые строки из бинарного мусора");
         appendToTerminal(" clear         - Очистить экран терминала");
-        appendToTerminal(" secret, [cmd] - Запустить секретную команду (см. подсказки find)");
         appendToTerminal("-------------------------------------------------");
-        appendToTerminal("💡 Подсказка: Попробуйте 'find дневник', 'strings' или введите 'void_access'");
+        appendToTerminal("💡 Подсказка: Попробуйте 'find дневник', 'strings' или 'why?'");
+        appendToTerminal("🔒 Некоторые команды видны только тем, кто ищет глубже...");
     }
 
     function clearScreen() {
@@ -295,16 +355,16 @@
     }
 
     function processCommand(input) {
-        let trimmed = input.trim().toLowerCase();
+        let trimmed = input.trim();
         if (trimmed === "") return;
 
         appendToTerminal(`[guest@sys] $&gt; ${input}`);
 
-        const parts = trimmed.split(/\s+/);
+        const parts = trimmed.toLowerCase().split(/\s+/);
         const command = parts[0];
         const args = parts.slice(1);
 
-        if (execSecret(command)) {
+        if (execSecret(trimmed)) {
             return;
         }
 
@@ -335,8 +395,13 @@
             case "clear":
                 clearScreen();
                 break;
-            case "secret":
-                appendToTerminal("Используйте конкретные ключи, например 'void_access' или 'mem_dump' (получены через find)");
+            case "why?":
+                // Если команда не сработала через execSecret (проблема с хэшем),
+                // даём подсказку
+                appendToTerminal("Хм... Система обдумывает твой вопрос...", false);
+                setTimeout(() => {
+                    appendToTerminal("Зачем? Я тоже не знаю... Что-то, возможно, скрыто пока от твоих глаз... Но нужно ждать.");
+                }, 500);
                 break;
             default:
                 appendToTerminal(`Ошибка: '${command}' не является внутренней или внешней командой. Введите help.`, true);
@@ -344,7 +409,6 @@
         }
     }
 
-    // События ввода (Enter и стрелки для истории)
     inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             const cmd = inputField.value;
