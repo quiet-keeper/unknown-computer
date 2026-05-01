@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARG :: Терминал доступа [v0.1]</title>
+    <title>ARG :: Терминал доступа [v0.2]</title>
     <style>
         * {
             margin: 0;
@@ -73,11 +73,6 @@
             animation: blink-animation 1s step-end infinite;
         }
 
-        .error-blink {
-            color: #ff6666;
-            animation: blink-animation 1.5s step-end infinite;
-        }
-
         @keyframes blink-animation {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
@@ -138,18 +133,41 @@
             border-top: 1px solid #111;
             padding: 4px;
         }
+        
+        /* Эффект глитча */
+        .glitch-effect {
+            animation: terminalGlitch 0.2s 3;
+        }
+        
+        @keyframes terminalGlitch {
+            0% { transform: translate(0); opacity: 1; }
+            20% { transform: translate(-3px, 1px); opacity: 0.8; }
+            40% { transform: translate(3px, -1px); opacity: 0.9; }
+            60% { transform: translate(-1px, 2px); opacity: 0.85; }
+            80% { transform: translate(1px, -2px); opacity: 0.95; }
+            100% { transform: translate(0); opacity: 1; }
+        }
+        
+        /* Для ASCII-рикролла */
+        .ascii-art {
+            color: #0f0;
+            white-space: pre;
+            font-family: monospace;
+            font-size: 10px;
+            line-height: 1.2;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-<div class="crt">
+<div class="crt" id="crtContainer">
     <div class="terminal-header">
-        <span>SYSTEM://ARG_EMU_V0.1</span>
-        <span>🌐 NETWORK: <span class="error-blink">⚠️ ОШИБКА [UNKNOWN]</span> ★ <span class="blink">▲</span></span>
+        <span>SYSTEM://ARG_EMU_V0.2</span>
+        <span>🌐 NETWORK: <span style="color:#ff6666;">⚠️ НЕСТАБИЛЬНО</span> ★ <span class="blink">▲</span></span>
     </div>
     <div class="terminal-output" id="output-area">
         <div>> Инициализация нейросвязи...</div>
         <div>> Система загружена. Введите HELP для списка команд.</div>
-        <div>> Доступные протоколы: чтение логов, поиск скрытых данных.</div>
         <div>> -------------------------------------------------</div>
     </div>
     <div class="command-line">
@@ -157,73 +175,138 @@
         <input type="text" id="command-input" autofocus>
     </div>
     <div class="help-tip">
-        📟 Команды: help | ls | read [файл] | find [ключ] | strings | why? | clear
+        📟 Команды: help | ls | read [файл] | find [ключ] | strings | final | clear
     </div>
 </div>
 
 <script>
+    // ============================================================
+    // КОМБО-ЛОВУШКА (стиль Cicada 3301)
+    // ============================================================
+    
+    let trapActivated = false;
+    let caesarSolved = false;
+    
+    // Функция для отображения ASCII-рикролла (финал ловушки)
+    function asciiRickRoll() {
+        const outputDiv = document.getElementById('output-area');
+        outputDiv.innerHTML = '';
+        
+        const rickLines = [
+            "╔════════════════════════════════════════════════════════════════╗",
+            "║                                                                ║",
+            "║     ██████╗ ██╗ ██████╗██╗  ██╗██████╗  ██████╗ ██╗     ██╗     ║",
+            "║     ██╔══██╗██║██╔════╝██║ ██╔╝██╔══██╗██╔═══██╗██║     ██║     ║",
+            "║     ██████╔╝██║██║     █████╔╝ ██████╔╝██║   ██║██║     ██║     ║",
+            "║     ██╔══██╗██║██║     ██╔═██╗ ██╔══██╗██║   ██║██║     ██║     ║",
+            "║     ██║  ██║██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗███████╗║",
+            "║     ╚═╝  ╚═╝╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝║",
+            "║                                                                ║",
+            "║           NEVER GONNA GIVE YOU UP                              ║",
+            "║           NEVER GONNA LET YOU DOWN                            ║",
+            "║           NEVER GONNA RUN AROUND AND DESERT YOU               ║",
+            "║                                                                ║",
+            "║     [СИСТЕМА] Несанкционированный доступ зафиксирован.        ║",
+            "║     [СИСТЕМА] Доступ к основным функциям заблокирован.        ║",
+            "╚════════════════════════════════════════════════════════════════╝"
+        ];
+        
+        rickLines.forEach(line => {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'ascii-art';
+            lineDiv.style.color = '#0f0';
+            lineDiv.style.fontSize = '11px';
+            lineDiv.innerHTML = line;
+            outputDiv.appendChild(lineDiv);
+        });
+        
+        // Добавляем аудио (опционально)
+        const audio = new Audio();
+        audio.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        // audio.play(); // Раскомментируй, если хочешь музыку
+    }
+    
+    // Шаг 4: Финальный удар — ASCII-рикролл
+    function finalRickRoll() {
+        const container = document.getElementById('crtContainer');
+        container.classList.add('glitch-effect');
+        
+        appendToTerminal("\n⚠️ СИСТЕМНЫЙ СБОЙ: ОБНАРУЖЕНА АНОМАЛИЯ В КОДЕ ⚠️", true);
+        appendToTerminal("> ...");
+        appendToTerminal("> ЗАПУСК АВАРИЙНОГО ПРОТОКОЛА...");
+        
+        setTimeout(() => {
+            asciiRickRoll();
+        }, 1500);
+    }
+    
+    // Шаг 3: Проверка шифра Цезаря (после того, как игрок нашёл фальшивую картинку)
+    function checkCaesar(input) {
+        // Ожидаемый ответ: "THE TRAP IS REAL" (после расшифровки)
+        // Зашифровано со сдвигом 3: "WKH WUDS LV EHDO"
+        const expectedCaesarAnswer = "wkh wuds lv ehdo";
+        if (input.toLowerCase() === expectedCaesarAnswer) {
+            caesarSolved = true;
+            appendToTerminal("\n✅ РАСШИФРОВКА УСПЕШНА.", false);
+            appendToTerminal("> Ты думал, что нашёл истину?");
+            appendToTerminal("> Но... ЭТО БЫЛА ЛОВУШКА.");
+            appendToTerminal("> Настоящий финал в другом месте.");
+            appendToTerminal("> А теперь...");
+            setTimeout(() => {
+                finalRickRoll();
+            }, 2000);
+            return true;
+        }
+        return false;
+    }
+    
+    // Шаг 2: Показать фальшивую картинку (ASCII-арт + скрытый шифр Цезаря)
+    function showFakeImage() {
+        appendToTerminal("\n🖼️ ЗАГРУЗКА ИЗОБРАЖЕНИЯ: 'sunset_terminal.png'");
+        appendToTerminal("> Вот что скрыто в файле:\n");
+        
+        // ASCII-арт "картинки" с закатом
+        const sunsetAscii = [
+            "        🌅",
+            "    🌞───────",
+            "   ──🌊🌊🌊──",
+            "  ──────────",
+            "",
+            "[Метаданные изображения]",
+            "Комментарий: WKH WUDS LV EHDO",
+            "Цветовая палитра: 0xDE 0xAD 0xBE 0xEF"
+        ];
+        
+        sunsetAscii.forEach(line => {
+            appendToTerminal(line);
+        });
+        
+        appendToTerminal("\n🔍 [СИСТЕМА] Обнаружена странная строка в метаданных: 'WKH WUDS LV EHDO'");
+        appendToTerminal("> Возможно, это шифр...");
+    }
+    
+    // Шаг 1: Первый уровень — фальшивый финал (игрок думает, что прошёл игру)
+    function fakeFinal() {
+        if (trapActivated) return;
+        trapActivated = true;
+        
+        appendToTerminal("\n✨✨✨ ПОЗДРАВЛЯЮ! ✨✨✨");
+        appendToTerminal("> Ты достиг ФИНАЛА ARG.");
+        appendToTerminal("> Вот твоя награда — секретное изображение...");
+        appendToTerminal("> ");
+        setTimeout(() => {
+            showFakeImage();
+        }, 1500);
+    }
+
+    // ============================================================
+    // ОСНОВНАЯ ЛОГИКА ТЕРМИНАЛА
+    // ============================================================
 
     const FILESYSTEM = {
-        "diary.txt": `=== ДНЕВНИК ===
-
-[ЗАПИСЬ #1 | 2016-11-28]
-Сегодня очень холодно. Ответ так и не был получен... 
-Может быть, я ищу не там?
-
-[ЗАПИСЬ #2 | 2016-12-03]
-Мои идеи слишком сложные и их тяжело понять. Они никому не интересны. Наверное, мне стоит объяснить проще, но это так тяжело делать.
-
-[ЗАПИСЬ #3 | 2016-12-15]
-Сегодня было ещё холоднее.
-
-[ЗАПИСЬ #4 | 2016-12-21]
-Даже когда я пытаюсь объяснить проще - это никому не интересно.
-Никто не хочет слушать меня, пытаться понять. Можно было бы в одиночку реализовать мою идею, но на это у меня уйдёт вся жизнь...
-
-[ЗАПИСЬ #5 | 2017-02-11]
-Только задавая вопросы мы можем узнать истину или приблизиться к правде`,
-
-        "messages.log": `=== ЖУРНАЛ СООБЩЕНИЙ (СЕРВЕР M-23) ===
-
-[16:47:02] > Отправитель: UNKNOWN
-[16:47:02] > Получатель: ANON
-[16:47:02] > Текст: Друг, у тебя очень уникальные работы, не грусти. Возможно, ты будущий гений.
-
-[23:15:44] > Отправитель: ANON
-[23:15:44] > Получатель: UNKNOWN
-[23:15:44] > Текст: Кто ты? Откуда у тебя моя почта?
-
-[23:16:01] > Отправитель: UNKNOWN
-[23:16:01] > Текст: Не переживай, я просто наткнулся на неё под одним из моих старых постов на форуме. Спасибо что помог мне тогда. `,
-
-        "notes.txt": `[ЗАМЕТКИ РУКОЙ]
-
-Главный пароль: [НЕ РАЗОБРАТЬ]
-Подсказка: hex(11) = B, hex(25) = ?
-Что-то не так с этой системой. Данные повреждаются при записи.
-
-Возможно, для этого эксперимента потребуется шифровать данные.`,
-
-        "syslog.bin": `SYS_DATA:0x00 0xFF [МУСОР] 0xDE 0xAD 0xBE 0xEF
-TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
-[СПРЯТАННОЕ СООБЩЕНИЕ] 
-Ж хм эцяы й еъцф чшрпхзйзъдщж, хц фхм цямхд цлрхцтц
-Продолжение следует...`
-    };
-
-
-    const HASHED_SECRETS = {
-        "3c6e0b8a9c15224a8228b9a98ca1531d": {
-            response: "Зачем? Я тоже не знаю... Что-то, возможно, скрыто пока от твоих глаз... Но нужно ждать.",
-            hint: "Ты задал правильный вопрос. Иногда ответ приходит не сразу."
-        }
-    };
-
-    const SECRET_COMMANDS = {
-        "mem_dump": "🔍 ДАМП ПАМЯТИ: Обнаружена странная строка в кеше процессора: 'Ты на правильном пути'.",
-        "void_access": "⚠️ СИСТЕМНЫЙ ЖУРНАЛ: В 03:15 была попытка входа с неизвестного терминала. Сообщение: 'Смотри глубже'.",
-        "decrypt_key": "💠 КЛЮЧ РАСШИФРОВКИ: 8.",
-        "last_will": "📜 ЗАПИСЬ: 'Если ты читаешь это, не теряй времени. Возьми свою жизнь в свои руки. Кто-то, возможно, ожидает тебя в том же мраке, что и ты.'"
+        "diary.txt": `=== ДНЕВНИК ===\n\n[ЗАПИСЬ #1 | 2016-11-28]\nСегодня очень холодно. Ответ так и не был получен...`,
+        "notes.txt": `[ЗАМЕТКИ РУКОЙ]\nГлавный пароль: [НЕ РАЗОБРАТЬ]\nПодсказка: hex(11) = B, hex(25) = ?`,
+        "syslog.bin": `SYS_DATA:0x00 0xFF [МУСОР] 0xDE 0xAD 0xBE 0xEF`
     };
 
     const outputDiv = document.getElementById('output-area');
@@ -243,22 +326,10 @@ TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
         line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-
-    function md5Hash(input) {
-
-        if (input === "why?") {
-            return "3c6e0b8a9c15224a8228b9a98ca1531d";
-        }
-  
-        return "";
-    }
-
     function listFiles() {
         const files = Object.keys(FILESYSTEM);
         appendToTerminal("📁 Доступные файлы для чтения:");
-        files.forEach(file => {
-            appendToTerminal(`   - ${file}`);
-        });
+        files.forEach(file => appendToTerminal(`   - ${file}`));
         appendToTerminal("(Используйте 'read [имя_файла]' чтобы открыть)");
     }
 
@@ -267,72 +338,8 @@ TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
         if (file) {
             appendToTerminal(`\n📄 Содержимое ${filename}:\n${file}\n`);
         } else {
-            appendToTerminal(`Файл "${filename}" не найден. Попробуйте ls.`, true);
+            appendToTerminal(`Файл "${filename}" не найден.`, true);
         }
-    }
-
-    function findKeyword(keyword) {
-        if (!keyword || keyword.length < 2) {
-            appendToTerminal("Использование: find [слово] (минимум 2 символа)", true);
-            return;
-        }
-        let found = false;
-        for (const [filename, content] of Object.entries(FILESYSTEM)) {
-            if (content.toLowerCase().includes(keyword.toLowerCase())) {
-                appendToTerminal(`🔎 Найдено в "${filename}":\n   ...${content.substring(0, 150)}...`);
-                found = true;
-            }
-        }
-        for (const [cmd, secretText] of Object.entries(SECRET_COMMANDS)) {
-            if (secretText.toLowerCase().includes(keyword.toLowerCase())) {
-                appendToTerminal(`🔮 Скрытая подсказка в системной области (команда: ${cmd}):\n   ${secretText}`);
-                found = true;
-            }
-        }
-
-        if (!found) {
-            appendToTerminal(`По запросу "${keyword}" ничего не найдено. Попробуйте 'strings' для сырого поиска.`);
-        }
-    }
-
-    function stringsDump() {
-        appendToTerminal("=== ВЫПОЛНЯЮ STRINGS НАД СИСТЕМНЫМ ОБРАЗОМ ===\n[Извлечение ASCII последовательностей...]");
-        const hiddenMessages = [
-            "[СЕКРЕТ] Важно: тебе понадобится способ расшифровки странных символов",
-            "[LOG] Наблюдения астрономии: 'Луч света говорит правду'",
-            "[SYSTEM] Удалено: 'некоторые вопросы не имеют ответов'",
-            "Дневник: Сигнал с Земли достигнет Пояса Койпера через 6,94 часа, Проксимы Центавры через 4 года и 3 месяца, а Андромеды только через 2,5 миллионов лет",
-            "#!/bin/sh Сообщение от Admin: большинство данных утеряно."
-        ];
-        
-        const shuffled = [...hiddenMessages].sort(() => 0.5 - Math.random());
-        shuffled.slice(0, 3).forEach(msg => {
-            appendToTerminal(`   🧩 STRINGS: ${msg}`);
-        });
-        appendToTerminal("--- Для более точного поиска используйте 'find [слово]' ---");
-    }
-
-    // Обработка секретных команд (включая хэшированную)
-    function execSecret(cmd) {
-        // Проверка обычных секретных команд
-        if (SECRET_COMMANDS[cmd]) {
-            appendToTerminal(`🤫 СЕКРЕТНАЯ КОМАНДА РАСПОЗНАНА (${cmd}):\n${SECRET_COMMANDS[cmd]}`);
-            return true;
-        }
-        
-        // Проверка хэшированной команды "why?"
-        const hashed = md5Hash(cmd);
-        if (HASHED_SECRETS[hashed]) {
-            const secret = HASHED_SECRETS[hashed];
-            appendToTerminal(`❓ ВЫ ВВЕЛИ: ${cmd}\n`);
-            appendToTerminal(`📜 ОТВЕТ СИСТЕМЫ:\n${secret.response}\n`);
-            if (secret.hint) {
-                appendToTerminal(`💭 ${secret.hint}`);
-            }
-            return true;
-        }
-        
-        return false;
     }
 
     function showHelp() {
@@ -340,18 +347,15 @@ TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
         appendToTerminal(" help          - Показать эту справку");
         appendToTerminal(" ls            - Показать список файлов");
         appendToTerminal(" read [file]   - Прочитать содержимое файла");
-        appendToTerminal(" find [слово]  - Искать по всем файлам и скрытым зонам");
-        appendToTerminal(" strings       - Извлечь скрытые строки из бинарного мусора");
+        appendToTerminal(" final         - Завершить игру (⚠️ НЕОБРАТИМО)");
         appendToTerminal(" clear         - Очистить экран терминала");
         appendToTerminal("-------------------------------------------------");
-        appendToTerminal("💡 Подсказка: Попробуйте 'find дневник', 'strings' или 'why?'");
-        appendToTerminal("🔒 Некоторые команды видны только тем, кто ищет глубже...");
+        appendToTerminal("💡 Подсказка: Попробуй 'final', если хочешь закончить...");
     }
 
     function clearScreen() {
         outputDiv.innerHTML = '';
         appendToTerminal("> Экран очищен. Введите help для команд.");
-        appendToTerminal("> -------------------------------------------------");
     }
 
     function processCommand(input) {
@@ -364,10 +368,37 @@ TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
         const command = parts[0];
         const args = parts.slice(1);
 
-        if (execSecret(trimmed)) {
+        // ============================================
+        // КОМБО-ЛОВУШКА: проверка на каждом шаге
+        // ============================================
+        
+        // Если игрок уже в ловушке на уровне шифра Цезаря
+        if (trapActivated && !caesarSolved) {
+            if (checkCaesar(trimmed)) {
+                return; // Ловушка продолжается, дальше не обрабатываем
+            }
+        }
+        
+        // Команда для ЗАПУСКА ловушки (фальшивый финал)
+        if (command === "final" && !trapActivated) {
+            fakeFinal();
+            return;
+        }
+        
+        // Если ловушка уже активирована, но игрок не ввёл шифр — блокируем другие команды
+        if (trapActivated && !caesarSolved) {
+            appendToTerminal("> Система ожидает расшифровку метаданных...", true);
+            appendToTerminal("> Попробуй расшифровать строку из изображения.", true);
+            return;
+        }
+        
+        // Если игрок уже получил рикролл — ничего не работает
+        if (caesarSolved) {
+            appendToTerminal("> СИСТЕМА ЗАБЛОКИРОВАНА. Доступ невозможен.", true);
             return;
         }
 
+        // Обычные команды (до активации ловушки)
         switch (command) {
             case "help":
                 showHelp();
@@ -377,34 +408,16 @@ TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
                 break;
             case "read":
                 if (args.length === 0) {
-                    appendToTerminal("Укажите имя файла. Например: read diary.txt", true);
+                    appendToTerminal("Укажите имя файла.", true);
                 } else {
                     readFile(args[0]);
                 }
                 break;
-            case "find":
-                if (args.length === 0) {
-                    appendToTerminal("Что ищем? Используйте: find [слово]", true);
-                } else {
-                    findKeyword(args.join(" "));
-                }
-                break;
-            case "strings":
-                stringsDump();
-                break;
             case "clear":
                 clearScreen();
                 break;
-            case "why?":
-                // Если команда не сработала через execSecret (проблема с хэшем),
-                // даём подсказку
-                appendToTerminal("Хм... Система обдумывает твой вопрос...", false);
-                setTimeout(() => {
-                    appendToTerminal("Зачем? Я тоже не знаю... Что-то, возможно, скрыто пока от твоих глаз... Но нужно ждать.");
-                }, 500);
-                break;
             default:
-                appendToTerminal(`Ошибка: '${command}' не является внутренней или внешней командой. Введите help.`, true);
+                appendToTerminal(`Ошибка: '${command}' не найдена. Введите help.`, true);
                 break;
         }
     }
@@ -438,7 +451,9 @@ TRACE: Уровень доступа: ГЛУБИННЫЙ СМОТР
     });
 
     document.body.addEventListener('click', () => {
-        inputField.focus();
+        if (!caesarSolved) {
+            inputField.focus();
+        }
     });
     inputField.focus();
 </script>
